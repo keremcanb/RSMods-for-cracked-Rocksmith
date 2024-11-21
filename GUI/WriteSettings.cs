@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Windows.Forms;
 using System.Diagnostics;
@@ -270,44 +270,9 @@ namespace RSMods
         #region Is RS Void
         public static void IsVoid(string installLocation) // Anti-Piracy Check (False = Real, True = Pirated) || Modified from Beat Saber Mod Assistant
         {
-            string reason = string.Empty;
-            bool fakeSteamApi = true;
-            try
-            {
-                X509Certificate2 cert = new X509Certificate2(X509Certificate.CreateFromSignedFile(Path.Combine(installLocation, "steam_api.dll")));
-
-                if (cert.GetNameInfo(X509NameType.SimpleName, false) == "Valve" || cert.Verify())
-                {
-                    fakeSteamApi = false;
-                }
-                else
-                {
-                    reason += "Invalid steam_api.dll certificate.";
-                }
-            }
-            catch { } // Fall-through = bad cert.
-
-            bool areCrackIndicationsPresent = File.Exists(Path.Combine(installLocation, "IGG-GAMES.COM.url")) || File.Exists(Path.Combine(installLocation, "SmartSteamEmu.ini")) || File.Exists(Path.Combine(installLocation, "GAMESTORRENT.CO.url")) || File.Exists(Path.Combine(installLocation, "Codex.ini")) || File.Exists(Path.Combine(installLocation, "Skidrow.ini")) || File.Exists(Path.Combine(installLocation, "steamclient.dll"));
-
-            if (areCrackIndicationsPresent)
-            {
-                reason += "\nParts of game crack are present in the folder.";
-            }
-
+            bool fakeSteamApi = false;
+            bool areCrackIndicationsPresent = false;
             bool isExeInvalid = !CheckExecutable(installLocation);
-
-            if (isExeInvalid)
-            {
-                reason += "\nGame executable version doesn't appear to be correct.";
-            }
-
-            if (areCrackIndicationsPresent || fakeSteamApi || isExeInvalid)
-            {
-                MessageBox.Show($"Incompatible Rocksmith version detected! Only the newest RS version is supported - RSMods doesn't support pirated / stolen copies of Rocksmith 2014! {Environment.NewLine}Reason: {reason}", "Incompatible Rocksmith version", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Process.Start("https://store.steampowered.com/app/221680/");
-                Environment.Exit(1);
-                return;
-            }
         }
 
         private static bool CheckExecutable(string installLocation)
@@ -321,7 +286,7 @@ namespace RSMods
 
                     byte[] hash = sha256.ComputeHash(exeStream);
 
-                    return hash.SequenceEqual(HASH_EXE) || hash.SequenceEqual(HASH_EXE_NEW); // True - User is using Remastered game, False - User is using a NON-Remastered game (VOID).
+                    return true; // True - User is using Remastered game, False - User is using a NON-Remastered game (VOID).
                 }
             }
             catch
